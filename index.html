@@ -1,0 +1,708 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 The Secret Message Vault</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+:root {
+  --bg: #100e20;
+  --panel: #1c1932;
+  --pink: #ff6ca7;
+  --purple: #b59aff;
+  --white: #fff7fc;
+  --muted: #aaa5c5;
+  --border: #393250;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Nunito', sans-serif;
+  color: var(--white);
+  background:
+    radial-gradient(ellipse at 15% 15%, #38234c 0, transparent 42%),
+    radial-gradient(ellipse at 90% 85%, #30214d 0, transparent 40%),
+    var(--bg);
+}
+
+input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vault {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+  font: 11px 'DM Mono', monospace;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.lights { display: flex; gap: 6px; }
+
+.lights i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pink);
+}
+
+.lights i:nth-child(2) { background: #ffce83; }
+.lights i:nth-child(3) { background: #91e6b9; }
+
+.status {
+  color: #ff9abb;
+  border: 1px solid #6c3655;
+  border-radius: 30px;
+  padding: 6px 10px;
+  font-size: 9px;
+}
+
+.screen {
+  display: none;
+  padding: clamp(22px, 6vw, 48px);
+  background: linear-gradient(145deg, #211d39, #171529);
+  border: 1px solid var(--border);
+  border-radius: 25px;
+  box-shadow: 0 25px 90px #0005;
+  animation: appear .45s ease both;
+  text-align: center;
+}
+
+#stage1:checked ~ .screen1,
+#stage2:checked ~ .screen2,
+#stage3:checked ~ .screen3,
+#stage4:checked ~ .screen4,
+#stage5:checked ~ .screen5 {
+  display: block;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.kicker {
+  font: 10px 'DM Mono', monospace;
+  color: var(--purple);
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+.big-icon {
+  font-size: 65px;
+  margin: 24px 0 14px;
+  filter: drop-shadow(0 0 20px #ff6ca733);
+}
+
+h1, h2 {
+  font-family: 'Playfair Display', serif;
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+h1 { font-size: clamp(35px, 7vw, 55px); }
+h2 { font-size: clamp(27px, 5vw, 36px); }
+
+h1 span, h2 span { color: var(--pink); }
+
+p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.intro {
+  max-width: 430px;
+  margin: 0 auto 26px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 23px;
+  border: 1px solid #ff91bb;
+  border-radius: 12px;
+  color: #24172b;
+  background: linear-gradient(120deg, #ff93ba, #ff6ca7);
+  font: 800 13px 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 30px #ff6ca733;
+}
+
+.button.secondary {
+  color: var(--white);
+  background: #292440;
+  border-color: #504566;
+}
+
+button { font-family: inherit; }
+
+.footer {
+  margin-top: 22px;
+  font: 9px 'DM Mono', monospace;
+  letter-spacing: 1px;
+  line-height: 2;
+  color: #827b9f;
+}
+
+.scanline {
+  width: 100%;
+  height: 3px;
+  border-radius: 10px;
+  background: #332c4b;
+  overflow: hidden;
+  margin: 24px 0;
+}
+
+.scanline::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 68%;
+  background: linear-gradient(90deg, var(--purple), var(--pink));
+  border-radius: inherit;
+}
+
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 25px 0;
+  text-align: left;
+}
+
+.file {
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: #211d36;
+}
+
+.file summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.file summary::-webkit-details-marker { display: none; }
+
+.file summary strong {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 13px;
+}
+
+.file summary span {
+  color: var(--pink);
+  font: 10px 'DM Mono', monospace;
+}
+
+.file p {
+  font-size: 12px;
+  border-top: 1px dashed #4b405f;
+  padding-top: 12px;
+  margin-bottom: 0;
+}
+
+.file[open] {
+  border-color: #a77bcf;
+  background: #2a2241;
+}
+
+.notice {
+  padding: 13px;
+  background: #29223f;
+  border-radius: 12px;
+  color: #c7b8f3;
+  font: 11px 'DM Mono', monospace;
+  line-height: 1.9;
+}
+
+.letter {
+  padding: clamp(23px, 6vw, 38px);
+  border-radius: 7px;
+  color: #382543;
+  background: linear-gradient(145deg, #fff3e9, #ffe2ed);
+  box-shadow: 0 15px 40px #0002;
+  text-align: left;
+  transform: rotate(-1deg);
+  margin: 25px 0;
+}
+
+.letter .to {
+  color: #a34f7c;
+  font: italic 15px 'Playfair Display', serif;
+}
+
+.letter p { color: #5e4766; }
+
+.signature {
+  color: #d54c8d;
+  font: italic 24px 'Playfair Display', serif;
+  text-align: right;
+}
+
+.field {
+  display: block;
+  text-align: left;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.text-input, textarea, input[type="date"] {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  color: var(--white);
+  background: #121020;
+  border: 1px solid #48405e;
+  border-radius: 10px;
+  font: 13px 'Nunito', sans-serif;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.text-input:focus, textarea:focus, input[type="date"]:focus {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+
+.visit-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  text-align: left;
+  margin: 20px 0;
+}
+
+.visit-choice label {
+  display: block;
+  height: 100%;
+  padding: 15px;
+  border: 1px solid #39324f;
+  border-radius: 13px;
+  cursor: pointer;
+  background: #211d36;
+  transition: .2s;
+}
+
+.visit-choice label:hover {
+  border-color: var(--pink);
+  transform: translateY(-2px);
+}
+
+.visit-choice input:checked + label {
+  border: 2px solid var(--pink);
+  padding: 14px;
+  background: #38243e;
+}
+
+.visit-choice .emoji {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.visit-choice strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.visit-choice small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.date-panel {
+  display: none;
+  margin: 15px 0;
+  padding: 16px;
+  border: 1px dashed #a56a9e;
+  border-radius: 13px;
+  background: #251d37;
+  text-align: left;
+}
+
+.visit-options:has(#surprise:checked) + .date-panel {
+  display: block;
+  animation: appear .3s ease;
+}
+
+.date-panel p {
+  font-size: 11px;
+  margin-bottom: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 15px;
+  border: 0;
+}
+
+.confirm-icon {
+  font-size: 65px;
+  margin: 15px 0;
+}
+
+.small-note {
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+@media (max-width: 460px) {
+  .file-grid, .visit-options { grid-template-columns: 1fr; }
+  .screen { padding: 24px 18px; }
+  .topbar { font-size: 9px; }
+}
+</style>
+</head>
+
+<body>
+
+<main class="vault">
+
+  <header class="topbar">
+    <div>
+      <div class="lights"><i></i><i></i><i></i></div>
+      <div style="margin-top:9px">FRIENDSHIP_OS v1.0</div>
+    </div>
+    <div class="status">● CLASSIFIED</div>
+  </header>
+
+  <!-- CSS-ONLY PAGE NAVIGATION -->
+  <input type="radio" name="stage" id="stage1" checked>
+  <input type="radio" name="stage" id="stage2">
+  <input type="radio" name="stage" id="stage3">
+  <input type="radio" name="stage" id="stage4">
+  <input type="radio" name="stage" id="stage5">
+
+  <!-- SCREEN 1: WELCOME -->
+  <section class="screen screen1">
+    <div class="kicker">✦ RESTRICTED ACCESS TERMINAL ✦</div>
+    <div class="big-icon">🔐</div>
+    <h1>The Secret<br><span>Message Vault.</span></h1>
+
+    <p class="intro">
+      Psst... you weren't supposed to find this website.
+      👀<br><br>
+      There's a secret message waiting for you.
+      But first, you must prove that you're the correct
+      human. This is serious business.
+    </p>
+
+    <div class="notice">
+      STATUS: ONE VERY IMPORTANT FRIEND DETECTED<br>
+      THREAT LEVEL: EXTREMELY CUTE<br>
+      MISSION: UNLOCK THE SECRET
+    </div>
+
+    <div class="scanline"></div>
+
+    <label for="stage2" class="button">
+      🔓 ENTER THE VAULT →
+    </label>
+
+    <div class="footer">
+      UNAUTHORIZED BORING PEOPLE WILL BE FIRED.
+      <br>JUST KIDDING. PROBABLY.
+    </div>
+  </section>
+
+  <!-- SCREEN 2: SECRET FILES -->
+  <section class="screen screen2">
+    <div class="kicker">FILE DIRECTORY / 001</div>
+    <div class="big-icon">🗂️</div>
+    <h2>Access <span>Granted.</span></h2>
+
+    <p>
+      Welcome, suspiciously wonderful human.
+      Three secret files have been recovered.
+      Open them all. Trust me. 👀
+    </p>
+
+    <div class="file-grid">
+
+      <details class="file">
+        <summary>
+          <span>FILE_001.txt</span>
+          <strong>📁 The Laugh Archive</strong>
+          <p>Click to decrypt ↓</p>
+        </summary>
+        <p>
+          Some of our conversations make absolutely no sense.
+          And somehow, those are the ones I remember most.
+          Your nonsense is appreciated.
+        </p>
+      </details>
+
+      <details class="file">
+        <summary>
+          <span>FILE_002.jpg</span>
+          <strong>📁 The Human File</strong>
+          <p>Click to decrypt ↓</p>
+        </summary>
+        <p>
+          Subject: You.<br>
+          Special ability: Making ordinary days better.<br>
+          Weakness: Probably snacks.<br>
+          Threat level: Too lovable to ignore.
+        </p>
+      </details>
+
+      <details class="file">
+        <summary>
+          <span>FILE_003.heart</span>
+          <strong>📁 The Real Reason</strong>
+          <p>Click to decrypt ↓</p>
+        </summary>
+        <p>
+          This isn't really about a secret.
+          I just wanted an excuse to make something
+          that would make you smile.
+          Mission accomplished? 💗
+        </p>
+      </details>
+
+      <details class="file">
+        <summary>
+          <span>FILE_004.exe</span>
+          <strong>📁 Friendship.exe</strong>
+          <p>Click to run ↓</p>
+        </summary>
+        <p>
+          Running friendship diagnostics...<br>
+          Laughs detected: Too many.<br>
+          Good memories: Still loading.<br>
+          Friendship status: Permanently installed.
+        </p>
+      </details>
+
+    </div>
+
+    <div class="notice">
+      ✓ FILES RECOVERED<br>
+      ✓ FRIENDSHIP VERIFIED<br>
+      ! FINAL MESSAGE DETECTED
+    </div>
+
+    <p>Okay, now comes the part where I get a little serious.</p>
+
+    <label for="stage3" class="button">
+      💌 OPEN THE FINAL MESSAGE →
+    </label>
+  </section>
+
+  <!-- SCREEN 3: SECRET LETTER -->
+  <section class="screen screen3">
+    <div class="kicker">ENCRYPTION DEACTIVATED</div>
+    <div class="big-icon">💗</div>
+    <h2>One last <span>secret.</span></h2>
+
+    <div class="letter">
+      <div class="to">Dear favorite human,</div>
+
+      <p>
+        If you've made it this far, congratulations.
+        You have successfully wasted some time on a website
+        that I made specifically for you. 😂
+      </p>
+
+      <p>
+        But seriously, I'm glad you're in my life.
+        The random conversations, the laughs, the little
+        moments — they mean more to me than I probably say.
+      </p>
+
+      <p>
+        And now I have a very important question...
+      </p>
+
+      <p style="font-size:19px;color:#bd4f87;font-weight:bold">
+        When do I get to see you in person? 🥹
+      </p>
+
+      <p>
+        Because this website is cute and all, but
+        I would much rather annoy you in real life.
+      </p>
+
+      <div class="signature">— Me ♡</div>
+    </div>
+
+    <p>One final mission remains. Choose your fate. 🎲</p>
+
+    <label for="stage4" class="button">
+      📅 PLAN OUR MEETUP →
+    </label>
+
+    <div class="footer">
+      MESSAGE DECRYPTED WITH LOVE.
+    </div>
+  </section>
+
+  <!-- SCREEN 4: VISIT FORM -->
+  <section class="screen screen4">
+    <div class="kicker">FRIENDSHIP DEPARTMENT / BOOKING FORM</div>
+    <div class="big-icon">🗓️</div>
+    <h2>When should <span>I come?</span></h2>
+
+    <p>
+      Choose your preferred plan, VIP.
+      Your decision will be forwarded to headquarters (me).
+    </p>
+
+    <!--
+      Replace YOUR_EMAIL with your email address.
+      Activate the endpoint using FormSubmit's verification email.
+    -->
+    <form action="https://formsubmit.co/YOUR_EMAIL"
+          method="POST">
+
+      <input type="hidden" name="_subject"
+             value="🔐 The Secret Vault: A new visit request!">
+
+      <input type="hidden" name="_template" value="table">
+
+      <label class="field">SELECT YOUR PREFERRED TIMELINE</label>
+
+      <div class="visit-options">
+
+        <div class="visit-choice">
+          <input type="radio" id="today" name="visit"
+                 value="Today!" required>
+          <label for="today">
+            <span class="emoji">🚀</span>
+            <strong>Today!</strong>
+            <small>Spontaneity is the plan.</small>
+          </label>
+        </div>
+
+        <div class="visit-choice">
+          <input type="radio" id="tomorrow" name="visit"
+                 value="Tomorrow">
+          <label for="tomorrow">
+            <span class="emoji">🌷</span>
+            <strong>Tomorrow</strong>
+            <small>Prepare yourself for my arrival.</small>
+          </label>
+        </div>
+
+        <div class="visit-choice">
+          <input type="radio" id="weekend" name="visit"
+                 value="This weekend">
+          <label for="weekend">
+            <span class="emoji">🍕</span>
+            <strong>This weekend</strong>
+            <small>Snacks. Chats. Chaos.</small>
+          </label>
+        </div>
+
+        <div class="visit-choice">
+          <input type="radio" id="surprise" name="visit"
+                 value="Surprise me">
+          <label for="surprise">
+            <span class="emoji">🎲</span>
+            <strong>Surprise me!</strong>
+            <small>Choose a date below, brave human.</small>
+          </label>
+        </div>
+
+      </div>
+
+      <div class="date-panel">
+        <label class="field" for="date">
+          📅 SELECT YOUR SECRET MEETING DATE
+        </label>
+        <input type="date" id="date" name="preferred_date">
+        <p>Pick a day that works for you. No pressure. 💗</p>
+      </div>
+
+      <label class="field" for="friend">YOUR NAME / SECRET IDENTITY</label>
+      <input class="text-input" type="text" id="friend"
+             name="friend_name" placeholder="The legendary human..."
+             required>
+
+      <label class="field" for="message">
+        ANY SPECIAL INSTRUCTIONS?
+      </label>
+      <textarea id="message" name="message"
+        placeholder="Bring snacks. Bring yourself. Leave the drama."></textarea>
+
+      <button class="button submit" type="submit">
+        📩 SEND MY TOP-SECRET RESPONSE
+      </button>
+
+      <p class="small-note">
+        Your response will be sent to the website owner's
+        configured email address via FormSubmit.
+        Your date is a request, not a confirmed appointment.
+      </p>
+
+    </form>
+
+    <div class="footer">
+      THANK YOU FOR YOUR COOPERATION, CITIZEN.
+    </div>
+  </section>
+
+  <!-- SCREEN 5: MANUAL CONFIRMATION / OPTIONAL -->
+  <section class="screen screen5">
+    <div class="kicker">MISSION ACCOMPLISHED</div>
+    <div class="confirm-icon">💌</div>
+    <h2>You're officially <span>awesome.</span></h2>
+    <p>
+      The vault is proud of you.
+      The Friendship Department thanks you for your time.
+    </p>
+    <label for="stage1" class="button">↻ RETURN TO THE VAULT</label>
+    <div class="footer">END OF TRANSMISSION ♥</div>
+  </section>
+
+  <footer class="footer" style="text-align:center">
+    FRIENDSHIP_OS · BUILT WITH ♥ AND QUESTIONABLE LOGIC
+    <br>THIS VAULT IS FOR FUN — NOT REAL SECURITY.
+  </footer>
+
+</main>
+</body>
+</html>
